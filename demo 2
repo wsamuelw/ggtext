@@ -1,0 +1,77 @@
+library(ggplot2)
+library(ggtext)
+library(dplyr)
+
+Hashtag <- c("#python", "#python", "#python", "#python", "#rstats", "#rstats", "#rstats", "#rstats")
+Category <- c("FiveLikes", "FiveRTs", "HasURL", "HasMedia", "FiveLikes", "FiveRTs", "HasURL", "HasMedia") 
+NumTweets <- c(179, 74, 604, 288, 428, 173, 592, 293)
+graph_data <- data.frame(Hashtag, Category, NumTweets, stringsAsFactors = FALSE)
+
+glimpse(graph_data)
+
+# Rows: 8
+# Columns: 3
+# $ Hashtag   <chr> "#python", "#python", "#python", "#python", "#rstats", "#rstats", "#rstats", "#rstats"
+# $ Category  <chr> "FiveLikes", "FiveRTs", "HasURL", "HasMedia", "FiveLikes", "FiveRTs", "HasURL", "HasMedia"
+# $ NumTweets <dbl> 179, 74, 604, 288, 428, 173, 592, 293
+
+my_chart <- ggplot(graph_data, aes(x=Category, y=NumTweets, fill= Hashtag)) + 
+  geom_col(position="dodge", alpha = 0.9) +
+  theme_minimal() +
+  xlab("") +
+  ylab("") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "grey")) +
+  scale_fill_manual(values = c("#ff8c00", "#346299"))
+
+my_chart + 
+  labs(title = "#python and #rstats: Comparing 1,000 random tweets")
+
+my_chart +
+  labs(
+    title = "<span style='color:#ff8c00'>#python</span> and 
+    <span style='color:#346299'>#rstats</span>: Comparing 1,000 random tweets"
+  ) +
+  theme(
+    plot.title = element_markdown()
+  )
+
+my_chart +
+  labs(
+    title = "<strong><span style='color:#ff8c00'>#python</span></strong></b> and 
+    <strong><span style='color:#346299'>#rstats</strong></b>: Comparing 1,000 random tweets"
+  ) +
+  theme(
+    plot.title = element_markdown(), legend.position = "none"
+  )
+
+graph_data <- graph_data %>%
+  mutate(
+    category_with_color = ifelse(Category %in% c("FiveLikes", "FiveRTs"), 
+                                 glue::glue("<strong><i style='color:red;font-size:14px'>{Category}</i></strong>"), 
+                                 glue::glue("<strong><i>{Category}</i></strong>"))
+  )
+
+#   Hashtag  Category NumTweets                                                category_with_color
+# 1 #python FiveLikes       179 <strong><i style='color:red;font-size:14px'>FiveLikes</i></strong>
+# 2 #python   FiveRTs        74   <strong><i style='color:red;font-size:14px'>FiveRTs</i></strong>
+# 3 #python    HasURL       604                                     <strong><i>HasURL</i></strong>
+# 4 #python  HasMedia       288                                   <strong><i>HasMedia</i></strong>
+# 5 #rstats FiveLikes       428 <strong><i style='color:red;font-size:14px'>FiveLikes</i></strong>
+# 6 #rstats   FiveRTs       173   <strong><i style='color:red;font-size:14px'>FiveRTs</i></strong>
+# 7 #rstats    HasURL       592                                     <strong><i>HasURL</i></strong>
+# 8 #rstats  HasMedia       293                                   <strong><i>HasMedia</i></strong>
+
+ggplot(graph_data, aes(x=category_with_color, y=NumTweets, fill= Hashtag)) + 
+  geom_col(position="dodge", alpha = 0.9) +
+  theme_minimal() +
+  xlab("") +
+  ylab("") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "grey")) +
+  scale_fill_manual(values = c("#ff8c00", "#346299")) + 
+  labs(
+    title = "<strong><span style='color:#ff8c00'>#python</span></strong></b> and <strong><span style='color:#346299'>#rstats</strong></b>: Comparing 1,000 random tweets"
+  ) +
+  theme(
+    plot.title = element_markdown(), legend.position = "none",
+    axis.text.x = element_markdown() # Added element_markdown() to axis.text.x in theme
+  ) 
